@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -21,8 +22,9 @@ namespace Corsinvest.ProxmoxVE.Api
         /// </summary>
         /// <param name="host"></param>
         /// <param name="port"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        public PveClient(string host, int port = 8006) : base(host, port) => _client = this;
+        public PveClient(string host, int port = 8006, TimeSpan? timeout = default) : base(host, port, timeout) => _client = this;
 
         private PveCluster _cluster;
         /// <summary>

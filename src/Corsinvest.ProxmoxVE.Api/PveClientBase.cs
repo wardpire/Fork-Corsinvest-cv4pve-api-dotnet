@@ -31,10 +31,11 @@ namespace Corsinvest.ProxmoxVE.Api
         /// </summary>
         /// <param name="host"></param>
         /// <param name="port"></param>
-        public PveClientBase(string host, int port = 8006)
+        public PveClientBase(string host, int port = 8006, TimeSpan? timeout = default)
         {
             Host = host;
             Port = port;
+            Timeout = timeout;
             _logger = NullLoggerFactory.Instance.CreateLogger<PveClientBase>();
         }
 
@@ -61,6 +62,11 @@ namespace Corsinvest.ProxmoxVE.Api
         /// Port
         /// </summary>
         public int Port { get; }
+
+        /// <summary>
+        /// Timeout
+        /// </summary>
+        public TimeSpan? Timeout{ get; }
 
         /// <summary>
         /// Get/Set the response type that is going to be returned when doing requests (json, png).
@@ -160,7 +166,7 @@ namespace Corsinvest.ProxmoxVE.Api
             => await ExecuteAction(resource, MethodType.Set, parameters);
 
         /// <summary>
-        /// Het http client
+        /// Get http client
         /// </summary>
         /// <returns></returns>
         public HttpClient GetHttpClient()
@@ -174,7 +180,8 @@ namespace Corsinvest.ProxmoxVE.Api
 #pragma warning restore S4830 // Server certificates should be verified during SSL/TLS connections
 
             var client = new HttpClient(handler);
-
+            if (Timeout.HasValue)
+                client.Timeout = Timeout.Value;
             //ticket login
             if (CSRFPreventionToken != null)
             {
