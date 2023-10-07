@@ -31,6 +31,7 @@ namespace Corsinvest.ProxmoxVE.Api
         /// </summary>
         /// <param name="host"></param>
         /// <param name="port"></param>
+        /// <param name="timeout"></param>
         public PveClientBase(string host, int port = 8006, TimeSpan? timeout = default)
         {
             Host = host;
