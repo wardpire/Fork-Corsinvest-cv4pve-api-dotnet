@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+using Corsinvest.ProxmoxVE.Api.Extension.Utils;
+using Corsinvest.ProxmoxVE.Api.Shared;
+using Corsinvest.ProxmoxVE.Api.Shared.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.CommandLine;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.Api.Extension.Utils;
-using Corsinvest.ProxmoxVE.Api.Shared;
-using Corsinvest.ProxmoxVE.Api.Shared.Utils;
-using Microsoft.Extensions.Logging;
 
 namespace Corsinvest.ProxmoxVE.Api.Shell.Helpers
 {
@@ -22,7 +22,7 @@ namespace Corsinvest.ProxmoxVE.Api.Shell.Helpers
     public static class CommandOptionExtension
     {
         /// <summary>
-        /// Add fullname and logo
+        /// Add fullName and logo
         /// </summary>
         /// <param name="command"></param>
         public static void AddFullNameLogo(this Command command)
@@ -171,7 +171,7 @@ For more information visit https://www.corsinvest.it/cv4pve";
         {
             var opt = command.VmIdOrNameOption();
             opt.Description = @"The id or name VM/CT comma separated (eg. 100,101,102,TestDebian)
--vmid or -name exclude (e.g. -200,-TestUbuntu)
+-vmid,-name,-@node-???,-@tag-?? exclude (e.g. -200,-TestUbuntu,-@tag-customer1)
 range 100:107,-105,200:204
 '@pool-???' for all VM/CT in specific pool (e.g. @pool-customer1),
 '@tag-???' for all VM/CT in specific tags (e.g. @tag-customerA),
