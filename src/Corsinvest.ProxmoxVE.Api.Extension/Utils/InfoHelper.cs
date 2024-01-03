@@ -3,11 +3,6 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Corsinvest.ProxmoxVE.Api.Shared.Models.Access;
 using Corsinvest.ProxmoxVE.Api.Shared.Models.Cluster;
 using Corsinvest.ProxmoxVE.Api.Shared.Models.Common;
@@ -15,6 +10,11 @@ using Corsinvest.ProxmoxVE.Api.Shared.Models.Node;
 using Corsinvest.ProxmoxVE.Api.Shared.Models.Pool;
 using Corsinvest.ProxmoxVE.Api.Shared.Models.Storage;
 using Corsinvest.ProxmoxVE.Api.Shared.Models.Vm;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
 {
@@ -33,6 +33,12 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
             /// </summary>
             /// <value></value>
             public Version Version { get; set; }
+
+            /// <summary>
+            /// Is Cluster
+            /// </summary>
+            /// <value></value>
+            public bool IsCluster { get; set; }
 
             /// <summary>
             /// Data execution
@@ -96,14 +102,13 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
                 /// <summary>
                 /// RrdData Day
                 /// </summary>
-                public IEnumerable<T> Day { get; set; }
+                public IEnumerable<T> Day { get; set; } = Enumerable.Empty<T>();
 
                 /// <summary>
                 /// RrdData week
                 /// </summary>
-                public IEnumerable<T> Week { get; set; }
+                public IEnumerable<T> Week { get; set; } = Enumerable.Empty<T>();
             }
-
 
             /// <summary>
             /// Firewall
@@ -602,8 +607,8 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
                 /// Node Vm Info
                 /// </summary>
                 public abstract class VmBaseInfo<TDetail, TConfig>
-                    where TDetail : NodeVmBase
-                    where TConfig : VmConfig
+                where TDetail : NodeVmBase
+                where TConfig : VmConfig
                 {
                     /// <summary>
                     /// Config
@@ -730,10 +735,10 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
         /// <param name="tasksOnlyErrors"></param>
         /// <param name="nodeReport"></param>
         public static async Task<Info> Collect(PveClient client,
-                                               bool removeSecurity,
-                                               int tasksDay,
-                                               bool tasksOnlyErrors = true,
-                                               bool nodeReport = false)
+            bool removeSecurity,
+            int tasksDay,
+            bool tasksOnlyErrors = true,
+            bool nodeReport = false)
         {
             var stopwatch = Stopwatch.StartNew();
 
@@ -767,7 +772,7 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
                 {
                     Id = item.Id,
                     Comment = item.Comment,
-                    Detail = await client.Pools[item].Get()
+                    Detail = await client.Pools[item.Id].Get()
                 });
             }
             #endregion
@@ -784,9 +789,12 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
 
         private static async Task ReadCluster(Info info, PveClient client)
         {
+            info.Cluster.Status = await client.Cluster.Status.Get();
+            info.IsCluster = !string.IsNullOrEmpty(info.Cluster.Status.FirstOrDefault(a => a.Type == Corsinvest.ProxmoxVE.Api.Shared.Utils.PveConstants.KeyApiCluster)?.Name);
+
             info.Cluster.Config.Nodes = await client.Cluster.Config.Nodes.Get();
             info.Cluster.Config.Qdevice = await client.Cluster.Config.Qdevice.Get();
-            info.Cluster.Config.Join = await client.Cluster.Config.Join.Get();
+            if (info.IsCluster) { info.Cluster.Config.Join = await client.Cluster.Config.Join.Get(); }
             info.Cluster.Config.Totem = await client.Cluster.Config.Totem.Get();
             info.Cluster.Config.ApiVersion = (await client.Cluster.Config.Apiversion.JoinApiVersion()).ToData() as string;
 
@@ -827,14 +835,13 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
             info.Cluster.Replication = await client.Cluster.Replication.Get();
             info.Cluster.Backups = await client.Cluster.Backup.Get();
             info.Cluster.Resources = await client.Cluster.Resources.Get();
-            info.Cluster.Status = await client.Cluster.Status.Get();
         }
 
         private static async Task<IEnumerable<Info.NodeInfo>> ReadNodes(PveClient client,
-                                                                        bool removeSecurity,
-                                                                        int tasksDay,
-                                                                        bool tasksOnlyErrors = true,
-                                                                        bool nodeReport = false)
+            bool removeSecurity,
+            int tasksDay,
+            bool tasksOnlyErrors = true,
+            bool nodeReport = false)
         {
             var dayTask = new DateTimeOffset(DateTime.Now.AddDays(-tasksDay)).ToUnixTimeSeconds();
 
@@ -890,20 +897,41 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
                 var disksAll = await nodeApi.Disks.List.Get(include_partitions: true);
                 foreach (var item in disksAll.Where(a => string.IsNullOrWhiteSpace(a.Parent)))
                 {
-                    disks.Add(new Info.NodeInfo.DisksInfo.DiskInfo
+                    NodeDiskSmart smart = null;
+
+                    try
+                    {
+                        smart = await nodeApi.Disks.Smart.Get(item.DevPath);
+                    }
+                    catch (Exception exSmart)
+                    {
+                        smart = new();
+                        smart.Attributes = new List<NodeDiskSmart.NodeDiskSmartAttribute>()
+                        {
+                            new()
+                            {
+                                Id = "0",
+                                Name = "Error",
+                                Raw = exSmart.Message,
+                                Value = -1
+                            }
+                        };
+                    }
+
+                    disks.Add(new()
                     {
                         Disk = item,
                         Partitions = disksAll.Where(a => a.Type == "partition" && a.Parent == item.DevPath).ToList(),
-                        Smart = await nodeApi.Disks.Smart.Get(item.DevPath)
+                        Smart = smart
                     });
                 }
 
                 //zfs
                 var zfs = new List<Info.NodeInfo.DisksInfo.ZfsInfo>();
                 node.Disks.Zfs = zfs;
-                foreach (var item in await nodeApi.Disks.Zfs.Get() ?? Enumerable.Empty<NodeDiskZfs>())
+                foreach (var item in (await nodeApi.Disks.Zfs.Get()) ?? Enumerable.Empty<NodeDiskZfs>())
                 {
-                    zfs.Add(new Info.NodeInfo.DisksInfo.ZfsInfo
+                    zfs.Add(new()
                     {
                         Zfs = item,
                         Detail = await nodeApi.Disks.Zfs[item.Name].Get()
@@ -939,12 +967,15 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
                     Detail = item,
                     Status = await storageNode.Status.Get(),
                     Content = item.Active
-                                    ? await storageNode.Content.Get()
-                                    : new List<NodeStorageContent>()
+                    ? await storageNode.Content.Get()
+                    : new List<NodeStorageContent>()
                 };
 
-                storage.RrdData.Day = await storageNode.Rrddata.Get(RrdDataTimeFrame.Day, RrdDataConsolidation.Average);
-                storage.RrdData.Week = await storageNode.Rrddata.Get(RrdDataTimeFrame.Week, RrdDataConsolidation.Average);
+                if (storage.Detail.Enabled)
+                {
+                    storage.RrdData.Day = await storageNode.Rrddata.Get(RrdDataTimeFrame.Day, RrdDataConsolidation.Average);
+                    storage.RrdData.Week = await storageNode.Rrddata.Get(RrdDataTimeFrame.Week, RrdDataConsolidation.Average);
+                }
 
                 storages.Add(storage);
             }
@@ -1030,7 +1061,14 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
 
                 //TODO agent get-memory-block-info,get-memory-blocks,get-time,get-users
                 // vm.Agent.GetFsInfo = await qemuApi.Agent.GetFsinfo.Get();
-                vm.Agent.GetHostName = await vmApi.Agent.GetHostName.Get();
+
+                try
+                {
+                    vm.Agent.GetHostName = await vmApi.Agent.GetHostName.Get();
+                }
+                catch //(PveExceptionResult ex)
+                { }
+
                 // vm.Agent.NetworkGetInterfaces = await qemuApi.Agent.NetworkGetInterfaces.Get();
                 // vm.Agent.Info = await qemuApi.Agent.Info.Get();
                 // vm.Agent.GetOsInfo = await qemuApi.Agent.GetOsinfo.Get();

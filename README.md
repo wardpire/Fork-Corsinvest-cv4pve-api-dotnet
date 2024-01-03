@@ -1,16 +1,6 @@
 # Corsinvest.ProxmoxVE.Api
 
-[![License](https://img.shields.io/github/license/Corsinvest/cv4pve-api-dotnet.svg)](LICENSE.md)
-
-[![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.svg?label=Nuget%20%20Api)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api)
-
-[![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.Extension.svg?label=Nuget%20%20Extension)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api.Extension)
-
-[![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.Metadata.svg?label=Nuget%20%20Metadata)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api.Metadata)
-
-[![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.Shell.svg?label=Nuget%20%20Shell)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api.Shell)
-
-[![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.Shared.svg?label=Nuget%20%20Shared)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api.Shared)
+[![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.svg?label=Nuget%20%20Api)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api) [![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.Extension.svg?label=Nuget%20%20Extension)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api.Extension) [![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.Metadata.svg?label=Nuget%20%20Metadata)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api.Metadata) [![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.Shell.svg?label=Nuget%20%20Shell)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api.Shell) [![Nuget](https://img.shields.io/nuget/v/Corsinvest.ProxmoxVE.Api.Shared.svg?label=Nuget%20%20Shared)](https://www.nuget.org/packages/Corsinvest.ProxmoxVE.Api.Shared)
 
 Proxmox VE Client API .Net
 
@@ -29,7 +19,7 @@ Corsinvest for Proxmox VE Api Client  (Made in Italy)
 ## Copyright and License
 
 Copyright: Corsinvest Srl
-For licensing details please visit [LICENSE.md](LICENSE.md)
+For licensing details please visit [LICENSE](LICENSE)
 
 ## Commercial Support
 
@@ -73,6 +63,7 @@ The client is generated from a JSON Api on Proxmox VE.
 * Async / Await
 * Add model in Shared library for decode json
 * Add Extension method **Get** to decode in json from result in Extension library
+* Login with One-time password for Two-factor authentication
 
 ## Api token
 

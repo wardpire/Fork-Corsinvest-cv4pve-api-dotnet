@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+using Corsinvest.ProxmoxVE.Api.Shared;
 using System;
 using System.Net.Sockets;
-using Corsinvest.ProxmoxVE.Api.Shared;
 
 namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
 {
@@ -24,7 +24,6 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
             => TryHostAndPort(hostsAndPortHA, 8006, true, timeout, out var host, out var port)
                     ? new PveClient(host, port)
                     : null;
-
 
         /// <summary>
         /// Try host and port. Format 10.1.1.90:8006,10.1.1.91:8006,10.1.1.92:8006

@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+using Corsinvest.ProxmoxVE.Api.Metadata;
+using Corsinvest.ProxmoxVE.Api.Shared.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,9 +17,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Corsinvest.ProxmoxVE.Api.Metadata;
-using Corsinvest.ProxmoxVE.Api.Shared.Utils;
-using Newtonsoft.Json;
 
 namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
 {
@@ -120,8 +120,7 @@ namespace Corsinvest.ProxmoxVE.Api.Extension.Utils
                 new("node-report,nrpt", "Node report", "get /nodes/{node}/report", true),
                 new("node-shutdown,nreb", "Node reboot or shutdown", "create /nodes/{node}/status command:cmd", true),
                 new("node-vzdump-list,nvlst", "Node list backup", "/get /nodes/{node}/storage/{storage}/content vmid:{vmid} content:backup", true),
-                new("node-vzdump-config,nvcfg", "Node Extract configuration from vzdump backup archive",
-                             "get /nodes/{node}/vzdump/extractconfig volume:{volume}", true),
+                new("node-vzdump-config,nvcfg", "Node Extract configuration from vzdump backup archive", "get /nodes/{node}/vzdump/extractconfig volume:{volume}", true),
 
                 //Qemu
                 new("qemu-list,qlst", "Qemu list vm", "get /nodes/{node}/qemu", true),
